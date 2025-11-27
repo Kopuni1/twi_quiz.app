@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}About | Twi Learning{% endblock %}
+
+{% block content %}
+<div class="relative max-w-5xl mx-auto mt-10">
+
+  <!-- Decorative Shapes -->
+  <div class="absolute -top-10 -left-10 w-48 h-48 bg-orange-200 rounded-full opacity-30 blur-3xl"></div>
+  <div class="absolute -bottom-10 -right-10 w-64 h-64 bg-yellow-200 rounded-full opacity-30 blur-3xl"></div>
+
+  <div class="relative z-10 text-center">
+    <h2 class="text-4xl font-bold text-orange-600 mb-6">About the Twi Learning Platform</h2>
+    <p class="text-gray-700 mb-8 text-lg">
+      Our mission is to help users learn Twi words, improve pronunciation, and play fun language games.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition relative overflow-hidden">
+        <img src="{{ url_for('static', filename='images/learn_words.svg') }}" alt="Learn Words" class="mx-auto w-24 mb-4 relative z-10">
+        <h3 class="text-xl font-semibold text-orange-500 mb-2 relative z-10">Learn Words</h3>
+        <p class="text-gray-600 relative z-10">Explore Twi vocabulary with examples and audio pronunciations.</p>
+        <div class="absolute -top-6 -right-6 w-20 h-20 bg-orange-100 rounded-full opacity-50 blur-2xl"></div>
+      </div>
+
+      <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition relative overflow-hidden">
+        <img src="{{ url_for('static', filename='images/play_games.svg') }}" alt="Play Games" class="mx-auto w-24 mb-4 relative z-10">
+        <h3 class="text-xl font-semibold text-orange-500 mb-2 relative z-10">Interactive Games</h3>
+        <p class="text-gray-600 relative z-10">Reinforce your learning with quizzes, Scrabble, and more.</p>
+        <div class="absolute -top-6 -right-6 w-20 h-20 bg-orange-100 rounded-full opacity-50 blur-2xl"></div>
+      </div>
+
+      <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition relative overflow-hidden">
+        <img src="{{ url_for('static', filename='images/word_day.svg') }}" alt="Word of the Day" class="mx-auto w-24 mb-4 relative z-10">
+        <h3 class="text-xl font-semibold text-orange-500 mb-2 relative z-10">Word of the Day</h3>
+        <p class="text-gray-600 relative z-10">Discover new words daily and improve your fluency.</p>
+        <div class="absolute -top-6 -right-6 w-20 h-20 bg-orange-100 rounded-full opacity-50 blur-2xl"></div>
+      </div>
+
+      <div class="bg-white p-6 rounded-xl shadow hover:shadow-lg transition relative overflow-hidden">
+        <img src="{{ url_for('static', filename='images/progress.svg') }}" alt="Track Progress" class="mx-auto w-24 mb-4 relative z-10">
+        <h3 class="text-xl font-semibold text-orange-500 mb-2 relative z-10">Track Progress</h3>
+        <p class="text-gray-600 relative z-10">Monitor your learning journey and see improvements over time.</p>
+        <div class="absolute -top-6 -right-6 w-20 h-20 bg-orange-100 rounded-full opacity-50 blur-2xl"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

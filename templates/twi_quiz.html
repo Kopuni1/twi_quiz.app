@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+
+    <h2 class="text-center mb-4">Twi Quiz</h2>
+
+    <!-- Quiz Box -->
+    <div id="quiz-box" class="card shadow p-4" style="display: none;">
+
+        <!-- Question Text -->
+        <h4 id="question-text" class="mb-3"></h4>
+
+        <!-- Audio Player (Rendered ONLY if audio exists) -->
+        <div id="audio-container" class="mb-3" style="display: none;">
+            <audio id="question-audio" controls></audio>
+        </div>
+
+        <!-- Choices -->
+        <div id="choices-container" class="list-group mb-4"></div>
+
+        <!-- Next Button -->
+        <button id="next-btn" class="btn btn-primary" style="display: none;">Next</button>
+    </div>
+
+    <!-- Start Quiz Button -->
+    <div class="text-center">
+        <button id="start-btn" class="btn btn-success btn-lg">Start Quiz</button>
+    </div>
+
+</div>
+
+<script>
+    let currentQuestion = 0;
+    let questions = [];
+
+    document.getElementById("start-btn").onclick = function () {
+        fetch("{% url 'twi_quiz_data' %}")
+            .then(response => response.json())
+            .then(data => {
+                questions = data.questions;
+                currentQuestion = 0;
+                document.getElementById("quiz-box").style.display = "block";
+                document.getElementById("start-btn").style.display = "none";
+                showQuestion();
+            });
+    };
+
+    function showQuestion() {
+        const q = questions[currentQuestion];
+
+        // Set question text
+        document.getElementById("question-text").innerText = q.question;
+
+        // Handle audio
+        const audioContainer = document.getElementById("audio-container");
+        const audioPlayer = document.getElementById("question-audio");
+
+        if (q.audio && q.audio !== "") {
+            audioContainer.style.display = "block";
+            audioPlayer.src = q.audio;   // IMPORTANT: backend must send full URL or MEDIA path
+        } else {
+            audioContainer.style.display = "none";
+            audioPlayer.src = "";
+        }
+
+        // Render answer choices
+        const choicesDiv = document.getElementById("choices-container");
+        choicesDiv.innerHTML = "";
+
+        q.choices.forEach(choice => {
+            const btn = document.createElement("button");
+            btn.className = "list-group-item list-group-item-action";
+            btn.innerText = choice;
+
+            btn.onclick = function () {
+                if (choice === q.correct_answer) {
+                    btn.classList.add("list-group-item-success");
+                } else {
+                    btn.classList.add("list-group-item-danger");
+                }
+
+                document.getElementById("next-btn").style.display = "block";
+            };
+
+            choicesDiv.appendChild(btn);
+        });
+
+        // Hide next button until answer selected
+        document.getElementById("next-btn").style.display = "none";
+    }
+
+    document.getElementById("next-btn").onclick = function () {
+        currentQuestion++;
+        if (currentQuestion < questions.length) {
+            showQuestion();
+        } else {
+            document.getElementById("quiz-box").innerHTML =
+                "<h3 class='text-center'>You have completed the quiz!</h3>";
+        }
+    };
+</script>
+
+{% endblock %}

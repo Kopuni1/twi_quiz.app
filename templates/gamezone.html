@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}Gamezone{% endblock %}
+
+{% block content %}
+<div class="container mx-auto mt-10 max-w-lg p-6">
+  <h1 class="text-3xl font-bold text-center mb-8 text-orange-600">🎮 Gamezone</h1>
+
+  <div class="space-y-4">
+    <!-- Scrabble -->
+    <a href="{{ url_for('scrabble') }}" 
+       class="block w-full p-6 bg-blue-500 text-white rounded-xl shadow hover:bg-blue-600 transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg text-center text-xl font-semibold">
+       Scrabble
+    </a>
+
+    <!-- General Quiz -->
+    <a href="{{ url_for('general_quiz') }}" 
+       class="block w-full p-6 bg-green-500 text-white rounded-xl shadow hover:bg-green-600 transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg text-center text-xl font-semibold">
+       General Quiz
+    </a>
+
+    <!-- Twi Quiz -->
+    <a href="{{ url_for('twi_quiz_home') }}" 
+       class="block w-full p-6 bg-purple-500 text-white rounded-xl shadow hover:bg-purple-600 transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg text-center text-xl font-semibold">
+       Twi Quiz
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,127 @@
+/* ================== Scrabble Game Styles ================== */
+
+/* Scrabble container: center everything */
+.scrabble-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 70vh;
+    margin-top: 20px;
+}
+
+/* ================== BOARD (10x10 grid) ================== */
+#board {
+    display: grid;
+    grid-template-columns: repeat(10, 50px); /* 10 columns */
+    grid-template-rows: repeat(10, 50px);    /* 10 rows */
+    gap: 4px;
+    justify-content: center;
+    margin: 20px auto;
+    background: #e0e0e0;
+    padding: 10px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+.board-cell {
+    width: 50px;
+    height: 50px;
+    background: #fff8dc;
+    border: 2px solid #d4d4d4;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+    transition: transform 0.1s, background 0.2s;
+}
+
+.board-cell:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+}
+
+.board-cell.drop-hover {
+    background: #fde68a !important;
+}
+
+.board-cell.dls { background: #bfdbfe; }
+.board-cell.dws { background: #fecaca; }
+.board-cell.tws { background: #fde047; }
+
+/* ================== RACK ================== */
+#rack {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 15px;
+    margin-bottom: 20px;
+}
+
+.rack-tile {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(145deg, #fef3c7, #f0d9b5);
+    border: 2px solid #c7a86f;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: grab;
+    transition: transform 0.1s, background 0.2s;
+}
+
+/* Dragging feedback */
+.rack-tile:active {
+    cursor: grabbing;
+    transform: scale(1.1);
+    box-shadow: 0 5px 6px rgba(0,0,0,0.3);
+}
+
+/* Hover effect */
+.rack-tile:hover {
+    background: linear-gradient(145deg, #fff2cc, #f4d98c);
+}
+
+/* ================== Info Messages ================== */
+#info {
+    margin-top: 15px;
+    font-size: 1.1em;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+}
+
+/* ================== Modal Styling ================== */
+.modal {
+    display: none; 
+    position: fixed; 
+    z-index: 1000; 
+    left: 0; 
+    top: 0; 
+    width: 100%; 
+    height: 100%; 
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 90%;
+    max-width: 400px;
+    border-radius: 10px;
+    text-align: center;
+}
+
+.modal-content h2 {
+    color: #4CAF50;
+}

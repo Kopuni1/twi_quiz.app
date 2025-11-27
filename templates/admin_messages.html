@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Admin – Contact Messages{% endblock %}
+
+{% block content %}
+
+<div class="max-w-5xl mx-auto mt-10">
+
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-3xl font-bold text-orange-600">Contact Messages</h2>
+
+        {% if session.get('username') == 'kwadwo' and messages|length > 0 %}
+        <form action="{{ url_for('delete_all_messages') }}" method="POST" onsubmit="return confirm('Are you sure you want to delete all messages?');">
+            <button type="submit" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 text-sm">
+                Delete All Messages
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    {% if messages|length == 0 %}
+        <div class="bg-white p-6 rounded-xl shadow text-center text-gray-600">
+            No messages have been submitted yet.
+        </div>
+    {% else %}
+        <div class="space-y-4">
+
+            {% for m in messages %}
+            <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-100">
+
+                <!-- Header -->
+                <div class="flex justify-between items-center mb-2">
+                    <h3 class="text-xl font-semibold text-gray-800">{{ m.name }}</h3>
+                    <div class="flex items-center space-x-2">
+                        <p class="text-sm text-gray-500">{{ m.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                        <span class="text-sm font-semibold {% if not m.is_read %}text-red-500{% else %}text-green-500{% endif %}">
+                            {% if not m.is_read %}● Unread{% else %}● Read{% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Email -->
+                <p class="text-gray-600 mb-3">
+                    <strong>Email:</strong>
+                    <a href="mailto:{{ m.email }}" class="text-blue-600 hover:underline">{{ m.email }}</a>
+                </p>
+
+                <!-- Message preview with expand/collapse -->
+                <div x-data="{ open: false }">
+                    <p class="text-gray-700">
+                        <span x-show="!open">{{ m.message[:120] }}{% if m.message|length > 120 %}...{% endif %}</span>
+                        <span x-show="open">{{ m.message }}</span>
+                    </p>
+
+                    {% if m.message|length > 120 %}
+                    <button @click="open = !open" class="mt-2 text-sm text-orange-600 hover:underline focus:outline-none">
+                        <span x-show="!open">Read more</span>
+                        <span x-show="open">Show less</span>
+                    </button>
+                    {% endif %}
+                </div>
+
+                <!-- ⭐ Mark as Read / Unread Button -->
+                <div x-data="{ isRead: {{ 'true' if m.is_read else 'false' }} }">
+                    <button 
+                        @click.prevent="
+                            fetch(isRead ? '{{ url_for('mark_unread_ajax', message_id=m.id) }}' 
+                                          : '{{ url_for('mark_read_ajax', message_id=m.id) }}', 
+                                  {method: 'POST'})
+                            .then(res => res.json())
+                            .then(data => {
+                                isRead = !isRead;
+                                document.getElementById('unread-count').textContent = data.unread_count;
+                            });
+                        "
+                        class="text-sm text-gray-600 hover:underline mt-2"
+                    >
+                        <span x-text="isRead ? 'Mark as Unread' : 'Mark as Read'"></span>
+                    </button>
+
+                    <span class="ml-2 text-sm font-semibold" 
+                          :class="isRead ? 'text-green-500' : 'text-red-500'" 
+                          x-text="isRead ? '● Read' : '● Unread'"></span>
+                </div>
+
+                <!-- ⭐ Delete Single Message -->
+                <form action="{{ url_for('delete_message', message_id=m.id) }}" method="POST" class="mt-3">
+                    <button type="submit" class="text-red-600 hover:underline text-sm">
+                        Delete Message
+                    </button>
+                </form>
+
+            </div>
+            {% endfor %}
+
+        </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}

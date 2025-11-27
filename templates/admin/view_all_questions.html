@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 class="text-2xl font-bold mb-4">All Quiz Questions</h1>
+
+<!-- SEARCH + CATEGORY FILTER -->
+<div class="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-3">
+
+    <!-- Search Bar -->
+    <input 
+        type="text" 
+        id="searchInput" 
+        placeholder="Search question, category, or options..." 
+        class="px-4 py-2 border border-gray-400 rounded w-full md:w-1/2"
+    >
+
+    <!-- Category Dropdown -->
+    <select id="categoryFilter" class="px-4 py-2 border border-gray-400 rounded w-full md:w-1/4">
+        <option value="all">All Categories</option>
+        {% set categories = questions | map(attribute='category') | unique %}
+        {% for cat in categories %}
+            <option value="{{ cat }}">{{ cat }}</option>
+        {% endfor %}
+    </select>
+
+</div>
+
+<!-- FULL-WIDTH WRAPPER -->
+<div class="overflow-x-auto w-full bg-white p-4 rounded-lg shadow">
+
+    <!-- TABLE -->
+    <table class="min-w-full border-collapse border border-gray-300" id="questionsTable">
+        <thead class="bg-gray-100">
+    <tr>
+        <th class="px-4 py-2 border">ID</th>
+        <th class="px-4 py-2 border">Category</th>
+        <th class="px-4 py-2 border">Question</th>
+        <th class="px-4 py-2 border">Option A</th>
+        <th class="px-4 py-2 border">Option B</th>
+        <th class="px-4 py-2 border">Option C</th>
+        <th class="px-4 py-2 border">Option D</th>
+        <th class="px-4 py-2 border">Correct</th>
+        <th class="px-4 py-2 border">Audio</th>
+        <th class="px-4 py-2 border">Actions</th>
+    </tr>
+</thead>
+
+<tbody>
+    {% for q in questions %}
+    <tr class="hover:bg-gray-50" data-category="{{ q.category }}">
+        <td class="px-4 py-2 border">{{ q.id }}</td>
+        <td class="px-4 py-2 border">{{ q.category }}</td>
+        <td class="px-4 py-2 border">{{ q.question }}</td>
+        <td class="px-4 py-2 border">{{ q.option_a }}</td>
+        <td class="px-4 py-2 border">{{ q.option_b }}</td>
+        <td class="px-4 py-2 border">{{ q.option_c }}</td>
+        <td class="px-4 py-2 border">{{ q.option_d }}</td>
+        <td class="px-4 py-2 border font-bold">{{ q.correct_option }}</td>
+        <td class="px-4 py-2 border">
+            {% if q.audio_filename %}
+                <audio controls style="width: 100%;">
+                    <source src="{{ url_for('static', filename='audio/' ~ q.audio_filename) }}" type="audio/mpeg">
+                    Your browser does not support the audio element.
+                </audio>
+            {% else %}
+                -
+            {% endif %}
+        </td>
+        <td class="px-4 py-2 border space-x-2">
+            <a href="{{ url_for('edit_question', question_id=q.id) }}" 
+               class="px-2 py-1 bg-blue-500 text-white rounded hover:bg-blue-600">Edit</a>
+
+            <form action="{{ url_for('delete_question', question_id=q.id) }}" method="POST" class="inline">
+                <button type="submit" 
+                        class="px-2 py-1 bg-red-500 text-white rounded hover:bg-red-600" 
+                        onclick="return confirm('Delete this question?');">
+                    Delete
+                </button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
+
+    </table>
+
+</div>
+
+<a href="{{ url_for('add_question') }}" 
+   class="mt-4 inline-block px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600">
+   Add New Question
+</a>
+
+<!-- JAVASCRIPT FILTERING -->
+<script>
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const rows = document.querySelectorAll('#questionsTable tbody tr');
+
+    function filterTable() {
+        const searchValue = searchInput.value.toLowerCase();
+        const selectedCategory = categoryFilter.value;
+
+        rows.forEach(row => {
+            const rowText = row.innerText.toLowerCase();
+            const rowCategory = row.dataset.category;
+
+            const matchesSearch = rowText.includes(searchValue);
+            const matchesCategory =
+                (selectedCategory === "all" || rowCategory === selectedCategory);
+
+            row.style.display = (matchesSearch && matchesCategory) ? "" : "none";
+        });
+    }
+
+    searchInput.addEventListener("keyup", filterTable);
+    categoryFilter.addEventListener("change", filterTable);
+</script>
+
+{% endblock %}

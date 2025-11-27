@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}{{ word.word }} | Twi Learning Platform{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto p-6 bg-white rounded shadow mt-6">
+  <h1 class="text-3xl font-bold mb-4 text-orange-600">{{ word.word }}</h1>
+
+  {% if word.pronunciation %}
+  <p><strong>Pronunciation:</strong> {{ word.pronunciation }}</p>
+  {% endif %}
+
+  {% if word.part_of_speech %}
+  <p><strong>Part of Speech:</strong> {{ word.part_of_speech }}</p>
+  {% endif %}
+
+  {% if word.definition %}
+  <p><strong>Definition:</strong> {{ word.definition }}</p>
+  {% endif %}
+
+  {% if word.example %}
+  <p><strong>Example:</strong> <em>{{ word.example }}</em></p>
+  {% endif %}
+
+  {% if word.audio_file %}
+  <div class="mt-4">
+    <audio id="word-audio" src="{{ url_for('static', filename='audio/' + word.audio_file) }}"></audio>
+    <button onclick="toggleAudio('word-audio')" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">▶ Play Audio</button>
+  </div>
+  {% endif %}
+
+  <div class="mt-6">
+    <a href="{{ url_for('dictionary') }}" class="text-blue-600 hover:underline">← Back to Dictionary</a>
+  </div>
+</div>
+
+<script>
+function toggleAudio(id) {
+  const audio = document.getElementById(id);
+  if (audio.paused) {
+    audio.play();
+  } else {
+    audio.pause();
+    audio.currentTime = 0;
+  }
+}
+</script>
+
+{% endblock %}

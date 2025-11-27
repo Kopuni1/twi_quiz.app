@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Twi Learning Platform{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-yellow-50 min-h-screen">
+
+<!-- Alpine.js -->
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+<nav class="bg-orange-600 text-white px-6 py-4 shadow-lg" x-data="{ gamezoneOpen: false, adminOpen: false }">
+  <div class="container mx-auto flex justify-between items-center">
+
+    <!-- LEFT SIDE LOGO -->
+    <a href="{{ url_for('home') }}" class="text-2xl font-bold">Twi Learning Hub</a>
+
+    <!-- NAV LINKS -->
+<ul class="flex items-center space-x-6 font-medium">
+
+  <li><a href="{{ url_for('home') }}" class="hover:text-gray-200">Home</a></li>
+  <li><a href="{{ url_for('dictionary') }}" class="hover:text-gray-200">Dictionary</a></li>
+
+  <!-- ⭐ GAMEZONE DROPDOWN -->
+  <li class="relative">
+    <button @click="gamezoneOpen = !gamezoneOpen" class="flex items-center hover:text-gray-200 focus:outline-none">
+      Gamezone ▼
+    </button>
+
+    <ul x-show="gamezoneOpen"
+        @click.away="gamezoneOpen = false"
+        x-transition
+        class="absolute left-0 mt-2 w-48 bg-white text-black rounded-lg shadow-lg z-50">
+
+      <li><a href="{{ url_for('scrabble') }}" class="block px-4 py-2 hover:bg-gray-100">Scrabble</a></li>
+      <li><a href="{{ url_for('twi_quiz_home') }}" class="block px-4 py-2 hover:bg-gray-100">Twi Quiz</a></li>
+      <li><a href="{{ url_for('score_dashboard') }}" class="block px-4 py-2 hover:bg-gray-100">Score Dashboard</a></li>
+
+    </ul>
+  </li>
+
+  {% if 'username' in session %}
+    <li><a href="{{ url_for('dashboard') }}" class="hover:text-gray-200">Word of the Day</a></li>
+  {% endif %}
+
+  <li><a href="{{ url_for('about') }}" class="hover:text-gray-200">About</a></li>
+
+  <!-- ⭐ NEW LINKS: FAQ + CONTACT -->
+  <li><a href="{{ url_for('faq') }}" class="hover:text-gray-200">FAQ</a></li>
+  <li><a href="{{ url_for('contact') }}" class="hover:text-gray-200">Contact</a></li>
+
+ <!-- ⭐ ADMIN DROPDOWN (ONLY FOR KWADWO) -->
+{% if session.get('username') == 'kwadwo' %}
+<li class="relative">
+  <button @click="adminOpen = !adminOpen" class="flex items-center hover:text-gray-200 focus:outline-none">
+    Admin ▼
+  </button>
+
+  <ul x-show="adminOpen"
+      @click.away="adminOpen = false"
+      x-transition
+      class="absolute left-0 mt-2 w-56 bg-white text-black rounded-lg shadow-lg z-50">
+
+    <li>
+      <a href="{{ url_for('admin_dashboard') }}" class="block px-4 py-2 hover:bg-gray-100">
+        Manage Words
+      </a>
+    </li>
+
+    <li>
+      <a href="/admin/quiz_history" class="block px-4 py-2 hover:bg-gray-100">
+        View Quiz History
+      </a>
+    </li>
+
+    <!-- ⭐ RENAMED: CONTACT MESSAGES -->
+    <li>
+      <a href="{{ url_for('admin_messages') }}" class="block px-4 py-2 hover:bg-gray-100">
+        View Messages
+      </a>
+    </li>
+
+  </ul>
+</li>
+{% endif %}
+
+
+  <!-- AUTH SECTION -->
+  {% if 'username' in session %}
+    <li><a href="{{ url_for('quiz_history') }}" class="hover:text-gray-200">My Game History</a></li>
+    <li><a href="{{ url_for('logout') }}" class="hover:text-gray-200">Logout</a></li>
+  {% else %}
+    <li><a href="{{ url_for('login') }}" class="hover:text-gray-200">Login</a></li>
+    <li><a href="{{ url_for('signup') }}" class="hover:text-gray-200">Sign Up</a></li>
+  {% endif %}
+
+</ul>
+  </div>
+</nav>
+</header>
+<!-- END NAVBAR -->
+
+<!-- MAIN CONTENT -->
+{% if request.endpoint == 'admin_dashboard' %}
+  <main class="p-6 w-full">
+{% else %}
+  <main class="p-6 max-w-5xl mx-auto">
+{% endif %}
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="mb-3 p-3 rounded text-white
+          {% if category == 'success' %}bg-green-500
+          {% elif category == 'error' %}bg-red-500
+          {% elif category == 'warning' %}bg-yellow-500
+          {% else %}bg-blue-500{% endif %}">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+</main>
+
+</body>
+</html>

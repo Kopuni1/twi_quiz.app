@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Quiz History{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold text-center text-orange-600 mb-6">📊 Admin Quiz History</h1>
+
+<!-- ================= FILTER BAR ================= -->
+<form method="get" class="flex gap-4 mb-6 justify-center">
+    <input type="text" name="user" value="{{ filter_user }}" placeholder="Filter by user"
+           class="px-3 py-2 border rounded">
+    <input type="text" name="category" value="{{ filter_category }}" placeholder="Filter by category"
+           class="px-3 py-2 border rounded">
+    <button class="px-4 py-2 bg-blue-600 text-white rounded">Apply</button>
+</form>
+
+<!-- ================= TABLE WITH MULTI-DELETE ================= -->
+<form method="post" action="{{ url_for('delete_quiz_records') }}">
+<div class="overflow-x-auto">
+    <table class="min-w-full bg-white shadow rounded">
+        <thead class="bg-orange-500 text-white">
+            <tr>
+                <th class="py-2 px-4">
+                    <input type="checkbox" id="selectAll" class="cursor-pointer">
+                </th>
+                <th class="py-2 px-4">
+                    <a href="?sort=username&order=asc">▲</a> User <a href="?sort=username&order=desc">▼</a>
+                </th>
+                <th class="py-2 px-4">
+                    <a href="?sort=category&order=asc">▲</a> Category <a href="?sort=category&order=desc">▼</a>
+                </th>
+                <th class="py-2 px-4">
+                    <a href="?sort=score&order=asc">▲</a> Score <a href="?sort=score&order=desc">▼</a>
+                </th>
+                <th class="py-2 px-4">Total Qs</th>
+                <th class="py-2 px-4">Actions</th>
+                <th class="py-2 px-4">
+                    <a href="?sort=date_taken&order=asc">▲</a> Date Taken <a href="?sort=date_taken&order=desc">▼</a>
+                </th>
+                <th class="py-2 px-4">Time Taken</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for r in records %}
+            <tr class="border-b text-center">
+                <!-- MULTI-DELETE CHECKBOX -->
+                <td class="py-2 px-4">
+                    <input type="checkbox" name="record_ids" value="{{ r.id }}" class="selectBox cursor-pointer">
+                </td>
+
+                <td class="py-2 px-4">{{ r.username }}</td>
+                <td class="py-2 px-4">{{ r.category }}</td>
+                <td class="py-2 px-4">{{ r.score }}</td>
+                <td class="py-2 px-4">{{ r.total_questions }}</td>
+
+                <!-- SINGLE DELETE BUTTON -->
+                <td class="py-2 px-4">
+                    <button type="submit" name="single_delete" value="{{ r.id }}" 
+                            class="px-2 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+                            onclick="return confirm('Are you sure you want to delete this record?');">
+                        Delete
+                    </button>
+                </td>
+
+                <!-- SAFE DATE -->
+                <td class="py-2 px-4">
+                    {{ r.date_taken.strftime('%Y-%m-%d %H:%M') if r.date_taken else '---' }}
+                </td>
+
+                <!-- SAFE TIME FORMAT -->
+                <td class="py-2 px-4">
+                    {% if r.time_taken is not none %}
+                        {% set h = r.time_taken // 3600 %}
+                        {% set m = (r.time_taken % 3600) // 60 %}
+                        {% set s = r.time_taken % 60 %}
+                        {{ "%02d:%02d:%02d"|format(h, m, s) }}
+                    {% else %} --- {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- MULTI-DELETE BUTTON -->
+<div class="flex justify-end mt-4">
+    <button type="submit" name="multi_delete" 
+            onclick="return confirm('Are you sure you want to delete selected records?');"
+            class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
+        Delete Selected
+    </button>
+</div>
+</form>
+
+<!-- ================= PAGINATION ================= -->
+<div class="flex justify-center gap-4 mt-6">
+    {% if page > 1 %}
+    <a href="?page={{ page - 1 }}" class="px-4 py-2 bg-gray-700 text-white rounded">Previous</a>
+    {% endif %}
+    {% if page < total_pages %}
+    <a href="?page={{ page + 1 }}" class="px-4 py-2 bg-gray-700 text-white rounded">Next</a>
+    {% endif %}
+</div>
+
+<!-- ================= CHARTS ================= -->
+<h2 class="text-2xl text-center font-bold mt-12 mb-4 text-orange-500">📈 Quiz Analytics</h2>
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    <div class="bg-white p-4 shadow rounded">
+        <h3 class="text-center font-semibold mb-2">Score Distribution</h3>
+        <canvas id="scoreChart"></canvas>
+    </div>
+    <div class="bg-white p-4 shadow rounded">
+        <h3 class="text-center font-semibold mb-2">Most Popular Categories</h3>
+        <canvas id="categoryChart"></canvas>
+    </div>
+    <div class="bg-white p-4 shadow rounded">
+        <h3 class="text-center font-semibold mb-2">Average Score per Category</h3>
+        <canvas id="avgScoreChart"></canvas>
+    </div>
+    <div class="bg-white p-4 shadow rounded">
+        <h3 class="text-center font-semibold mb-2">Quizzes Taken Per Day</h3>
+        <canvas id="dailyChart"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const scoreData = {{ all_scores|default([])|tojson }};
+const categoryLabels = {{ categories|default([])|tojson }};
+const categoryCounts = {{ category_counts|default([])|tojson }};
+const avgCategories = {{ avg_categories|default([])|tojson }};
+const avgScores = {{ avg_scores|default([])|tojson }};
+const days = {{ days|default([])|tojson }};
+const dayCounts = {{ day_counts|default([])|tojson }};
+
+// CHARTS
+new Chart(document.getElementById("scoreChart"), { type: "bar", data: { labels: scoreData, datasets: [{ data: scoreData }] } });
+new Chart(document.getElementById("categoryChart"), { type: "bar", data: { labels: categoryLabels, datasets: [{ data: categoryCounts }] } });
+new Chart(document.getElementById("avgScoreChart"), { type: "bar", data: { labels: avgCategories, datasets: [{ data: avgScores }] } });
+new Chart(document.getElementById("dailyChart"), { type: "line", data: { labels: days, datasets: [{ data: dayCounts }] } });
+
+// SELECT ALL CHECKBOX
+document.getElementById('selectAll').addEventListener('change', function() {
+    const checked = this.checked;
+    document.querySelectorAll('.selectBox').forEach(cb => cb.checked = checked);
+});
+</script>
+{% endblock %}

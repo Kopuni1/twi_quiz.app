@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-10">
+
+    <div class="bg-white p-10 rounded-2xl shadow-xl text-center max-w-lg">
+        <h1 class="text-3xl font-bold mb-5 text-green-600">Quiz Completed!</h1>
+
+        <p class="text-xl font-semibold mb-4">
+            Score: {{ score }} / {{ total }}
+        </p>
+
+        <p class="text-xl mb-6">
+            ⏱ Time Taken: <span class="font-bold">{{ time_taken }} seconds</span>
+        </p>
+
+        <a href="/quiz/general"
+        class="mt-4 inline-block bg-blue-600 text-white px-6 py-3 rounded-xl shadow hover:opacity-80">
+         Try Again
+        </a>
+
+    </div>
+
+</div>
+{% endblock %}

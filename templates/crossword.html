@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block title %}Crossword{% endblock %}
+
+{% block content %}
+<h2>Crossword Game</h2>
+<p>This is the Crossword game page. Your Crossword JS can go here.</p>
+<script src="{{ url_for('static', filename='js/crossword.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="max-w-lg mx-auto p-6 bg-white rounded shadow">
+  <h2 class="text-xl font-bold mb-4">Edit Word: {{ word.word }}</h2>
+  <form method="POST">
+    <label>Pronunciation:</label>
+    <input type="text" name="pronunciation" value="{{ word.pronunciation }}" class="w-full mb-2 border p-2 rounded">
+
+    <label>Part of Speech:</label>
+    <input type="text" name="part_of_speech" value="{{ word.part_of_speech }}" class="w-full mb-2 border p-2 rounded">
+
+    <label>Definition:</label>
+    <textarea name="definition" class="w-full mb-2 border p-2 rounded">{{ word.definition }}</textarea>
+
+    <label>Example:</label>
+    <textarea name="example" class="w-full mb-2 border p-2 rounded">{{ word.example }}</textarea>
+
+    <label>Audio File (optional):</label>
+    <input type="text" name="audio_file" value="{{ word.audio_file }}" class="w-full mb-4 border p-2 rounded">
+
+    <button type="submit" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600">Save Changes</button>
+    <a href="{{ url_for('admin_dashboard') }}" class="ml-2 text-gray-600">Cancel</a>
+  </form>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}My Game History{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-6 text-center text-orange-600">📊 My Quiz History</h1>
+
+{% if history %}
+<div class="overflow-x-auto">
+    <table class="min-w-full bg-white rounded-lg shadow">
+        <thead>
+            <tr class="bg-orange-500 text-white">
+                <th class="py-2 px-4">Category</th>
+                <th class="py-2 px-4">Score</th>
+                <th class="py-2 px-4">Total Questions</th>
+                <th class="py-2 px-4">Date Taken</th>
+                <th class="py-2 px-4">Time Taken</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in history %}
+            <tr class="text-center border-b">
+                <td class="py-2 px-4">{{ record.category | capitalize }}</td>
+                <td class="py-2 px-4">{{ record.score }}</td>
+                <td class="py-2 px-4">{{ record.total_questions }}</td>
+                <td class="py-2 px-4">{{ record.date_taken.strftime('%Y-%m-%d %H:%M') }}</td>
+                <td class="py-2 px-4">
+                    {% set hours = record.time_taken // 3600 %}
+                    {% set minutes = (record.time_taken % 3600) // 60 %}
+                    {% set seconds = record.time_taken % 60 %}
+                    {{ '%02d:%02d:%02d'|format(hours, minutes, seconds) }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p class="text-center text-gray-700 mt-6">You haven't completed any quizzes yet.</p>
+{% endif %}
+{% endblock %}

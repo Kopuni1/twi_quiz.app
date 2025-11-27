@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Twi Quiz Topics{% endblock %}
+
+{% block content %}
+<h1 class="text-3xl font-bold mb-6 text-center text-orange-600">📝 Twi Quiz Topics</h1>
+
+{% if topics %}
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    {% set colors = ['bg-blue-500', 'bg-green-500', 'bg-purple-500', 'bg-red-500', 'bg-yellow-500'] %}
+
+    {% for topic in topics %}
+        {% set color = colors[loop.index0 % colors|length] %}
+
+        <div class="rounded-lg shadow-lg overflow-hidden">
+            <!-- COLORED HEADER -->
+            <div class="{{ color }} p-4 flex justify-between items-center">
+                <h2 class="text-xl font-semibold text-white">{{ topic | capitalize }}</h2>
+                {% if topic_has_audio[topic] %}
+                    <span title="Audio question available">🔊</span>
+                {% endif %}
+            </div>
+
+            <!-- BODY WHITE BOX -->
+            <div class="p-4 bg-white">
+                {% set completed = session.get('completed_quizzes', []) %}
+                {% set total_questions = topic_questions.get(topic, 0) %}
+
+                {% if topic in completed %}
+                    <p class="text-green-600 font-medium">✅ Completed</p>
+                {% else %}
+                    <p class="text-gray-700">Questions Available: {{ total_questions }}</p>
+                {% endif %}
+
+                <!-- START QUIZ BUTTON -->
+                <a href="{{ url_for('twi_quiz', topic=topic) }}"
+                   class="mt-2 inline-block w-full text-center px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">
+                    Start Quiz
+                </a>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+{% else %}
+    <p class="text-center text-gray-700">No quiz topics available.</p>
+{% endif %}
+
+{% endblock %}

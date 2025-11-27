@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}{{ category | capitalize }} Quiz{% endblock %}
+
+{% block content %}
+<div class="container mx-auto mt-10 max-w-3xl">
+    <h2 class="text-3xl font-bold text-center mb-6">📝 {{ category | capitalize }} Quiz</h2>
+
+    <!-- TIMER DISPLAY -->
+    <div class="text-center mb-6">
+        <p class="text-xl font-semibold">⏱ Time: 
+            <span id="timer" class="font-bold text-blue-600">0:00</span>
+        </p>
+    </div>
+
+    <form method="POST" id="quiz-form">
+        <div class="question p-5 bg-white rounded-lg shadow mb-6">
+
+            <!-- QUESTION TEXT -->
+            <p class="font-semibold text-lg mb-4">
+                {{ q_index + 1 }}. {{ question.question }}
+            </p>
+
+            <!-- AUDIO (if exists) -->
+            {% if question.audio_file %}
+            <div class="mb-4">
+                <audio controls class="w-full">
+                    <source src="{{ url_for('static', filename='audio/' ~ question.audio_file) }}" type="audio/mpeg">
+                    Your browser does not support audio.
+                </audio>
+            </div>
+            {% endif %}
+
+            <!-- OPTIONS -->
+            {% for option in question.options %}
+            <label class="block mb-3 cursor-pointer">
+                <div class="flex items-center space-x-3 p-3 bg-gray-100 hover:bg-gray-200 rounded-lg transition">
+                    <input type="radio" name="question-{{ question.id }}" value="{{ option.text }}" required>
+                    <span>{{ option.text }}</span>
+                </div>
+            </label>
+            {% endfor %}
+
+            <!-- NEXT / SUBMIT BUTTON -->
+            <button type="submit" class="mt-2 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+                {% if q_index + 1 == total_questions %}Submit{% else %}Next{% endif %}
+            </button>
+
+        </div>
+    </form>
+</div>
+
+<script>
+// TIMER SCRIPT
+let seconds = 0;
+function updateTimer() {
+    seconds++;
+    let mins = Math.floor(seconds / 60);
+    let secs = seconds % 60;
+    document.getElementById("timer").innerText = `${mins}:${secs.toString().padStart(2,'0')}`;
+}
+setInterval(updateTimer, 1000);
+</script>
+{% endblock %}

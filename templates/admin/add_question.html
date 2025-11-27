@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto p-6">
+    <h1 class="text-3xl font-bold mb-6">Add New Quiz Question</h1>
+
+    <form action="{{ url_for('add_question') }}" method="POST" class="space-y-4">
+        <!-- Category -->
+        <div>
+            <label class="block font-semibold">Category</label>
+            <input type="text" name="category" class="w-full border rounded px-3 py-2" placeholder="e.g., general, animals, days_of_week" required>
+        </div>
+
+        <!-- Question -->
+        <div>
+            <label class="block font-semibold">Question</label>
+            <textarea name="question" class="w-full border rounded px-3 py-2" rows="3" required></textarea>
+        </div>
+
+        <!-- Options -->
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label class="block font-semibold">Option A</label>
+                <input type="text" name="option_a" class="w-full border rounded px-3 py-2" required>
+            </div>
+            <div>
+                <label class="block font-semibold">Option B</label>
+                <input type="text" name="option_b" class="w-full border rounded px-3 py-2" required>
+            </div>
+            <div>
+                <label class="block font-semibold">Option C</label>
+                <input type="text" name="option_c" class="w-full border rounded px-3 py-2" required>
+            </div>
+            <div>
+                <label class="block font-semibold">Option D</label>
+                <input type="text" name="option_d" class="w-full border rounded px-3 py-2" required>
+            </div>
+        </div>
+
+        <!-- Correct Option -->
+        <div>
+            <label class="block font-semibold">Correct Option</label>
+            <select name="correct_option" class="w-full border rounded px-3 py-2" required>
+                <option value="">Select correct option</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+            </select>
+        </div>
+
+        <!-- Difficulty -->
+        <div>
+            <label class="block font-semibold">Difficulty</label>
+            <select name="difficulty" class="w-full border rounded px-3 py-2">
+                <option value="easy">Easy</option>
+                <option value="medium" selected>Medium</option>
+                <option value="hard">Hard</option>
+            </select>
+        </div>
+
+        <!-- Audio Filename -->
+        <div>
+            <label class="block font-semibold">Audio Filename (optional)</label>
+            <input type="text" name="audio_filename" class="w-full border rounded px-3 py-2" placeholder="e.g., Adom.mp3">
+            <p class="text-gray-500 text-sm mt-1">Make sure the file exists in <code>static/audio/</code></p>
+        </div>
+
+        <!-- Buttons -->
+        <div>
+            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700">
+                Add Question
+            </button>
+            <a href="{{ url_for('view_all_questions') }}" class="px-4 py-2 bg-gray-400 text-white rounded hover:bg-gray-500">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

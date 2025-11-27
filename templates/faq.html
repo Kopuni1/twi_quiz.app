@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block title %}FAQ | Twi Learning{% endblock %}
+
+{% block content %}
+<div class="mt-10 max-w-3xl mx-auto">
+  <h2 class="text-3xl font-bold text-orange-600 mb-6">Frequently Asked Questions</h2>
+
+  <div class="space-y-6">
+
+    <div class="bg-white p-6 rounded-lg shadow">
+      <h3 class="text-xl font-semibold text-orange-600">1. What is the Twi Learning Platform?</h3>
+      <p class="text-gray-700 mt-2">
+        It is an interactive platform designed to help you learn, practice, and improve your Twi language skills
+        through lessons, games, word-of-the-day features, and pronunciation tools.
+      </p>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow">
+      <h3 class="text-xl font-semibold text-orange-600">2. Do I need an account to use the platform?</h3>
+      <p class="text-gray-700 mt-2">
+        Some features like the Word of the Day and quiz tracking require an account.  
+        However, basic browsing and learning resources may be available without logging in.
+      </p>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow">
+      <h3 class="text-xl font-semibold text-orange-600">3. Is the platform free?</h3>
+      <p class="text-gray-700 mt-2">
+        Yes! Most features are completely free. Additional premium or advanced features 
+        may be introduced in the future, but core learning tools remain accessible to everyone.
+      </p>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow">
+      <h3 class="text-xl font-semibold text-orange-600">4. How often is new content added?</h3>
+      <p class="text-gray-700 mt-2">
+        New words, quizzes, and features are added regularly to keep your learning experience fresh and engaging.
+      </p>
+    </div>
+
+    <div class="bg-white p-6 rounded-lg shadow">
+      <h3 class="text-xl font-semibold text-orange-600">5. How can I report mistakes or suggest new features?</h3>
+      <p class="text-gray-700 mt-2">
+        You can use our <a href="{{ url_for('contact') }}" class="text-orange-500 hover:underline">Contact Page</a> 
+        to send feedback, suggestions, or corrections. We appreciate your input!
+      </p>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}Twi Scrabble{% endblock %}
+
+{% block content %}
+
+<style>
+  /* Board grid */
+  #board {
+    display: grid;
+    gap: 4px;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+
+  .board-cell {
+    width: 50px;
+    height: 50px;
+    border: 2px solid #d4d4d4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    background: #fff8dc;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  /* Rack tiles */
+  #rack {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .rack-tile {
+    width: 50px;
+    height: 50px;
+    background: #fef3c7;
+    border: 2px solid #d97706;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+    cursor: grab;
+  }
+
+  .rack-tile:active { cursor: grabbing; }
+
+  .drop-hover { background: #fde68a !important; }
+
+  /* Bonus styles */
+  .dls { background: #bfdbfe !important; }
+  .dws { background: #fecaca !important; }
+  .tws { background: #fde047 !important; }
+
+  /* Modals */
+  .modal { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.5); justify-content:center; align-items:center; }
+  .modal.active { display:flex; }
+  .modal-content { background:#fff; padding:20px; border-radius:8px; max-width:400px; width:90%; }
+</style>
+
+<!-- Level Selection Modal -->
+<div id="level-modal" class="modal active">
+  <div class="modal-content text-center">
+    <h2 class="text-2xl font-bold mb-4 text-orange-600">Select Difficulty Level</h2>
+    <button class="course-btn bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded m-2" data-level="beginner">
+      🟢 Beginner (1–2 letters)
+    </button>
+    <button class="course-btn bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded m-2" data-level="intermediate">
+      🟡 Intermediate (3–4 letters)
+    </button>
+    <button class="course-btn bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded m-2" data-level="advanced">
+      🔴 Advanced (5+ letters)
+    </button>
+  </div>
+</div>
+
+<!-- Scrabble Game Container -->
+<div class="scrabble-container hidden p-6">
+  <h2 class="text-2xl font-bold text-center text-orange-600 mb-6">Twi Scrabble</h2>
+
+  <div class="text-center mb-4">
+    <p class="text-lg">👤 Player: <strong>{{ session['username'] }}</strong></p>
+    <p class="text-sm text-gray-600">Level: <span id="selected-level"></span></p>
+  </div>
+
+  <div id="board"></div>
+  <div id="rack"></div>
+
+  <div class="text-center space-x-3 mt-4">
+    <button id="confirm-word" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Confirm Word</button>
+    <button id="shuffle-tiles" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Shuffle Tiles</button>
+    <button id="end-game" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">End Game</button>
+  </div>
+
+  <div id="info" class="text-center mt-4 text-lg font-semibold text-gray-700"></div>
+</div>
+
+<!-- Game Summary Modal -->
+<div id="summary-modal" class="modal">
+  <div class="modal-content text-center">
+    <h2 class="text-2xl font-bold text-green-600 mb-2">🏁 Game Summary</h2>
+    <p class="text-gray-700 mb-4">Well done, {{ session['username'] }}!</p>
+    <p id="final-score" class="text-lg font-semibold"></p>
+    <button id="close-summary" class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600 mt-4">Close</button>
+  </div>
+</div>
+
+<!-- Celebration Balloons -->
+<canvas id="balloonCanvas" class="fixed top-0 left-0 w-full h-full pointer-events-none hidden"></canvas>
+
+<!-- Audio Effects -->
+<audio id="success-sound" src="{{ url_for('static', filename='sounds/success.mp3') }}"></audio>
+<audio id="fail-sound" src="{{ url_for('static', filename='sounds/fail.mp3') }}"></audio>
+
+<!-- Pass variables to JS -->
+<script>
+  const DICT_PATH = "{{ url_for('static', filename='twi_words.json') }}";
+</script>
+
+<script src="{{ url_for('static', filename='js/scrabble.js') }}"></script>
+
+{% endblock %}

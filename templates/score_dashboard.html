@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+{% block title %}Score Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mx-auto mt-10 text-center">
+
+    <h1 class="text-3xl font-bold mb-6 text-green-600">
+        📊 Your Quiz Score Dashboard
+    </h1>
+
+    {% if records and records|length > 0 %}
+
+        <!-- STORE ALL RECORDS -->
+        <script id="records-data" type="application/json">
+            {{ records | tojson }}
+        </script>
+
+        <!-- SUMMARY BOX -->
+        <div class="bg-white shadow-md p-4 rounded-lg mb-6 inline-block text-left w-full sm:w-3/4 mx-auto">
+            <p class="text-lg font-semibold text-blue-700">📈 Average Score: <span id="avgScore"></span>%</p>
+            <p class="text-lg font-semibold text-purple-700 mt-2">🏆 Best Category: <span id="bestCategory"></span></p>
+            <p class="text-lg font-semibold text-orange-700 mt-2">🔥 Last Quiz: <span id="lastQuiz"></span></p>
+        </div>
+
+        <!-- CATEGORY FILTER -->
+        <div class="mb-6">
+            <label class="font-semibold mr-2">Filter by category:</label>
+            <select id="categoryFilter" class="border p-2 rounded">
+                <option value="all">All</option>
+            </select>
+        </div>
+
+        <!-- CHART TYPE TOGGLE -->
+        <div class="mb-6">
+            <button id="toggleChart" class="px-4 py-2 bg-orange-500 text-white rounded hover:bg-orange-600">
+                Switch to Bar Chart
+            </button>
+            <button id="radarChartBtn" class="px-4 py-2 bg-purple-500 text-white rounded hover:bg-purple-600 ml-2">
+                Show Radar Chart
+            </button>
+        </div>
+
+        <!-- MAIN CHART -->
+        <canvas id="scoreChart" width="400" height="200" class="mb-6"></canvas>
+
+        <!-- PER-CATEGORY PROGRESS BARS -->
+        <div class="mb-6" id="categoryProgress"></div>
+
+        <!-- EXPORT BUTTONS -->
+        <div class="mb-6">
+            <button id="exportExcel" class="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600 mr-2">
+                Export to Excel
+            </button>
+            <button id="exportPDF" class="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600">
+                Export to PDF
+            </button>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+        <script>
+            let allRecords = JSON.parse(document.getElementById("records-data").textContent);
+
+            // --- CATEGORY FILTER DROPDOWN ---
+            const categories = [...new Set(allRecords.map(r => r.category))];
+            const categoryFilter = document.getElementById("categoryFilter");
+            categories.forEach(cat => {
+                const opt = document.createElement("option");
+                opt.value = cat;
+                opt.textContent = cat;
+                categoryFilter.appendChild(opt);
+            });
+
+            // --- SUMMARY FUNCTIONS ---
+            function computeAverage(records) {
+                if (!records.length) return 0;
+                let total = records.reduce((sum, r) => sum + r.score, 0);
+                return Math.round(total / records.length);
+            }
+
+            function computeBestCategory(records) {
+                if (!records.length) return "N/A";
+                let grouped = {};
+                records.forEach(r => {
+                    if (!grouped[r.category]) grouped[r.category] = [];
+                    grouped[r.category].push(r.score);
+                });
+                let bestCat = null, bestAvg = -1;
+                for (let cat in grouped) {
+                    let avg = grouped[cat].reduce((a,b) => a+b,0)/grouped[cat].length;
+                    if(avg>bestAvg){ bestAvg=avg; bestCat=cat; }
+                }
+                return bestCat;
+            }
+
+            function getLastQuiz(records){
+                if(!records.length) return "N/A";
+                let last = records[records.length-1];
+                return `${last.category} (${last.score}/${last.total_questions})`;
+            }
+
+            document.getElementById("avgScore").textContent = computeAverage(allRecords);
+            document.getElementById("bestCategory").textContent = computeBestCategory(allRecords);
+            document.getElementById("lastQuiz").textContent = getLastQuiz(allRecords);
+
+            // --- PER-CATEGORY PROGRESS BARS ---
+            const progressDiv = document.getElementById("categoryProgress");
+            categories.forEach(cat=>{
+                let catRecords = allRecords.filter(r=>r.category===cat);
+                let avg = catRecords.reduce((sum,r)=>sum+r.score,0)/catRecords.length;
+                let wrapper = document.createElement("div");
+                wrapper.className="mb-2 text-left";
+                wrapper.innerHTML=`<span class="font-semibold">${cat}: </span>
+                <div class="w-full bg-gray-200 rounded h-4">
+                    <div class="bg-green-500 h-4 rounded" style="width:${avg}%"></div>
+                </div>`;
+                progressDiv.appendChild(wrapper);
+            });
+
+            // --- CHART SETUP ---
+            let currentType = "line";
+            let chartInstance = null;
+
+            function renderChart(records, type=currentType){
+                const labels = records.map(r=>r.date_taken+" "+r.time_taken);
+                const scores = records.map(r=>r.score);
+
+                const ctx = document.getElementById("scoreChart");
+                if(chartInstance) chartInstance.destroy();
+
+                chartInstance = new Chart(ctx,{
+                    type: type,
+                    data:{
+                        labels:labels,
+                        datasets:[{
+                            label:'Quiz Score Over Time',
+                            data:scores,
+                            borderWidth:3,
+                            tension:0.3,
+                            borderColor:'rgba(34,197,94,1)',
+                            backgroundColor:'rgba(34,197,94,0.2)',
+                            fill:true,
+                            pointRadius:5
+                        }]
+                    },
+                    options:{
+                        responsive:true,
+                        scales:{y:{beginAtZero:true,max:100}}
+                    }
+                });
+            }
+
+            renderChart(allRecords);
+
+            // CATEGORY FILTER CHANGE
+            categoryFilter.addEventListener("change",()=>{
+                const selected = categoryFilter.value;
+                let filtered = selected==="all"? allRecords : allRecords.filter(r=>r.category===selected);
+                renderChart(filtered);
+            });
+
+            // TOGGLE LINE/BAR
+            document.getElementById("toggleChart").addEventListener("click",()=>{
+                currentType = currentType==="line"?"bar":"line";
+                renderChart(allRecords);
+                document.getElementById("toggleChart").textContent=currentType==="line"?"Switch to Bar Chart":"Switch to Line Chart";
+            });
+
+            // SHOW RADAR CHART
+            document.getElementById("radarChartBtn").addEventListener("click",()=>{
+                const avgPerCategory = categories.map(cat=>{
+                    let recs = allRecords.filter(r=>r.category===cat);
+                    return recs.length? recs.reduce((a,b)=>a+b.score,0)/recs.length : 0;
+                });
+
+                if(chartInstance) chartInstance.destroy();
+                const ctx = document.getElementById("scoreChart");
+                chartInstance = new Chart(ctx,{
+                    type:'radar',
+                    data:{
+                        labels:categories,
+                        datasets:[{
+                            label:'Average Score Per Category',
+                            data:avgPerCategory,
+                            backgroundColor:'rgba(255,99,132,0.2)',
+                            borderColor:'rgba(255,99,132,1)',
+                            borderWidth:2,
+                            pointRadius:4
+                        }]
+                    },
+                    options:{responsive:true, scales:{r:{beginAtZero:true,max:100}}}
+                });
+            });
+
+            // EXPORT TO EXCEL
+            document.getElementById("exportExcel").addEventListener("click",()=>{
+                const ws = XLSX.utils.json_to_sheet(allRecords);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb,ws,"QuizHistory");
+                XLSX.writeFile(wb,"quiz_history.xlsx");
+            });
+
+            // EXPORT TO PDF
+            document.getElementById("exportPDF").addEventListener("click",()=>{
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                doc.text("Quiz History",14,20);
+                allRecords.forEach((r,i)=>{
+                    doc.text(`${i+1}. ${r.category} | ${r.score}/${r.total_questions} | ${r.date_taken} ${r.time_taken}`,14,30+10*i);
+                });
+                doc.save("quiz_history.pdf");
+            });
+
+        </script>
+
+    {% else %}
+        <p class="text-gray-700 mt-4">You haven’t completed any quizzes yet.</p>
+    {% endif %}
+
+</div>
+{% endblock %}

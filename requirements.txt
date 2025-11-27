@@ -1,0 +1,6 @@
+flask
+gunicorn
+psycopg2-binary
+werkzeug
+jinja2
+python-dotenv

@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container" style="max-width:600px; margin:auto; padding:40px;">
+    <h2 style="text-align:center; color:#ff6600;">Word of the Day</h2>
+    {% if word %}
+        <div style="background:#fff8f0; padding:20px; border-radius:12px; box-shadow:0 0 10px rgba(0,0,0,0.1); margin-top:20px;">
+            <h3 style="color:#333;">{{ word['word'] }}</h3>
+            <p><strong>Pronunciation:</strong> {{ word['pronunciation'] or 'N/A' }}</p>
+            <p><strong>Part of Speech:</strong> {{ word['part_of_speech'] or 'N/A' }}</p>
+            <p><strong>Definition:</strong> {{ word['definition'] or 'N/A' }}</p>
+            <p><strong>Example:</strong> {{ word['example'] or 'N/A' }}</p>
+            {% if word['audio'] %}
+            <audio controls style="margin-top:10px;">
+                <source src="{{ url_for('static', filename='audio/' + word['audio']) }}" type="audio/mpeg">
+                Your browser does not support the audio element.
+            </audio>
+            {% endif %}
+        </div>
+    {% else %}
+        <p style="text-align:center;">No words available yet.</p>
+    {% endif %}
+</div>
+{% endblock %}
