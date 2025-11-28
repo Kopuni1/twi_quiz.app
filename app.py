@@ -364,6 +364,43 @@ def delete_word(word_id):
     flash("Word deleted successfully!", "success")
     return redirect(url_for('admin_dashboard'))
 
+@app.route('/twi_quiz/<topic>')
+@login_required
+def twi_quiz(topic):
+    # Load questions for this topic
+    questions = load_questions(topic)  # adjust to your function name
+
+    if not questions:
+        return redirect(url_for('twi_quiz_topics'))
+
+    return render_template('twi_quiz.html', topic=topic, questions=questions)
+
+
+@app.route('/twi_quiz_home')
+@login_required
+def twi_quiz_home():
+    topics = get_all_twi_topics()
+
+    topic_has_audio = {}
+    topic_questions = {}
+
+    # Loop through topics and check audio + question count
+    for topic in topics:
+        topic_has_audio[topic] = has_audio_for_topic(topic)  # returns True/False
+        topic_questions[topic] = count_questions_for_topic(topic)  # returns integer
+
+    return render_template(
+        'twi_quiz_home.html',
+        topics=topics,
+        topic_has_audio=topic_has_audio,
+        topic_questions=topic_questions
+    )
+
+@app.route('/score_dashboard')
+@login_required
+def score_dashboard():
+    ...
+
 # -------------------------------
 # Dictionary
 # -------------------------------
