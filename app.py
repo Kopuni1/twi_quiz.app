@@ -150,6 +150,11 @@ def logout():
     flash("Logged out successfully.", "info")
     return redirect(url_for('home'))
 
+@app.route('/scrabble')
+@login_required
+def scrabble():
+    return render_template('scrabble.html')  # Make sure this template exists
+
 # -------------------------------
 # Section 3: Dashboards
 # -------------------------------
