@@ -298,43 +298,6 @@ def delete_user(username):
     flash(f"User {username} deleted successfully.", "success")
     return redirect(url_for('admin_dashboard'))
 
-# Add / Edit / Delete Words (words table)
-@app.route('/admin/words/add', methods=['POST'])
-@login_required
-def add_word():
-    if session.get('role') != 'admin':
-        flash("Only admins can add words.", "danger")
-        return redirect(url_for('login'))
-
-    word = request.form['word'].strip()
-    pronunciation = request.form.get('pronunciation', '').strip()
-    part_of_speech = request.form.get('part_of_speech', '').strip()
-    definition = request.form.get('definition', '').strip()
-    example = request.form.get('example', '').strip()
-    audio_file = request.form.get('audio_file', '').strip()
-
-    if not word or not definition:
-        flash("Word and definition are required.", "warning")
-        return redirect(url_for('admin_dashboard'))
-
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("""
-        INSERT INTO words (word, pronunciation, part_of_speech, definition, example, audio_file)
-        VALUES (%s, %s, %s, %s, %s, %s)
-        ON CONFLICT (word) DO UPDATE SET
-            pronunciation = EXCLUDED.pronunciation,
-            part_of_speech = EXCLUDED.part_of_speech,
-            definition = EXCLUDED.definition,
-            example = EXCLUDED.example,
-            audio_file = EXCLUDED.audio_file
-    """, (word, pronunciation, part_of_speech, definition, example, audio_file))
-    conn.commit()
-    cur.close()
-    conn.close()
-
-    flash(f"'{word}' added successfully!", "success")
-    return redirect(url_for('admin_dashboard'))
 
 # Edit word
 @app.route('/edit_word/<int:word_id>', methods=['GET', 'POST'])
@@ -557,4 +520,10 @@ def send_message():
 # Section 6: Run App
 # -------------------------------
 if __name__ == '__main__':
-    app.run(debug=True)
+    # Use environment variables if set, otherwise default to localhost:5000
+    host = os.getenv("FLASK_HOST", "127.0.0.1")
+    port = int(os.getenv("FLASK_PORT", 5000))
+    debug = os.getenv("FLASK_DEBUG", "True") == "True"
+
+    app.run(host=host, port=port, debug=debug)
+
