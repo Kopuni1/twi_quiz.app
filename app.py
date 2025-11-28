@@ -397,6 +397,116 @@ def delete_word(word_id):
     return redirect(url_for('admin_dashboard'))
 
 # -------------------------------
+# Dictionary
+# -------------------------------
+@app.route('/dictionary', methods=['GET', 'POST'])
+def dictionary():
+    if 'username' not in session:
+        flash("Please log in to access the dictionary.", "warning")
+        return redirect(url_for('login'))
+
+    search_results = []
+    search_word = None
+
+    conn = get_db_connection()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+
+    # Fetch all words for the main grid
+    cur.execute("""
+        SELECT id, word, pronunciation, part_of_speech, definition, example, audio_file
+        FROM words
+        ORDER BY word
+    """)
+    words = cur.fetchall()
+
+    # Search logic
+    if request.method == 'POST':
+        search_word = request.form['word'].strip()
+        cur.execute("""
+            SELECT id, word, pronunciation, part_of_speech, definition, example, audio_file
+            FROM words
+            WHERE word ILIKE %s
+            ORDER BY word
+        """, (f"%{search_word}%",))
+        search_results = cur.fetchall()
+
+        if search_results:
+            # Move exact match to the top
+            exact_match = None
+            other_results = []
+            for w in search_results:
+                if w['word'].lower() == search_word.lower():
+                    exact_match = w
+                else:
+                    other_results.append(w)
+            search_results = [exact_match] + other_results if exact_match else other_results
+        else:
+            flash(f"No results found for '{search_word}'", "warning")
+
+    cur.close()
+    conn.close()
+
+    return render_template(
+        'dictionary.html',
+        words=words,
+        search_results=search_results,
+        search_word=search_word
+    )
+
+@app.route('/word/<int:word_id>')
+def word_detail(word_id):
+    if 'username' not in session:
+        flash("Please log in to access the dictionary.", "warning")
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("""
+        SELECT word, pronunciation, part_of_speech, definition, example, audio_file
+        FROM words
+        WHERE id = %s
+    """, (word_id,))
+    word = cur.fetchone()
+    cur.close()
+    conn.close()
+
+    if not word:
+        flash("Word not found.", "warning")
+        return redirect(url_for('dictionary'))
+
+    return render_template('word_detail.html', word=word)
+
+@app.route('/add_word', methods=['POST'])
+def add_word():
+    if session.get('role') != 'admin':
+        flash("Only admins can add words.", "danger")
+        return redirect(url_for('login'))
+
+    word = request.form['word'].strip()
+    pronunciation = request.form.get('pronunciation', '').strip()
+    part_of_speech = request.form.get('part_of_speech', '').strip()
+    definition = request.form.get('definition', '').strip()
+    example = request.form.get('example', '').strip()
+    audio_file = request.form.get('audio_file', '').strip()
+
+    if not word or not definition:
+        flash("Word and definition are required.", "warning")
+        return redirect(url_for('admin_dashboard'))
+
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("""
+        INSERT INTO words (word, pronunciation, part_of_speech, definition, example, audio_file)
+        VALUES (%s, %s, %s, %s, %s, %s)
+    """, (word, pronunciation, part_of_speech, definition, example, audio_file))
+    conn.commit()
+    cur.close()
+    conn.close()
+
+    flash(f"'{word}' added successfully!", "success")
+    return redirect(url_for('admin_dashboard'))
+
+# -------------------------------
 # Section 5: Public Routes
 # -------------------------------
 @app.route('/')
