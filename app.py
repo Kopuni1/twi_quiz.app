@@ -530,30 +530,69 @@ def add_word():
     flash(f"'{word}' added successfully!", "success")
     return redirect(url_for('admin_dashboard'))
 
-from flask import render_template
-from flask_login import login_required, current_user  # if using Flask-Login
+from flask import Flask, render_template, abort
+from flask_login import LoginManager, login_required, current_user
 
-# Optional: Admin-only access decorator
+app = Flask(__name__)
+login_manager = LoginManager(app)
+# Configure secret key, database, etc. as needed
+
+# -----------------------------
+# Admin-only access decorator
+# -----------------------------
 def admin_required(f):
     from functools import wraps
-    from flask import abort
     @wraps(f)
     def decorated_function(*args, **kwargs):
+        # Ensure user is logged in and is admin
         if not current_user.is_authenticated or not getattr(current_user, "is_admin", False):
             abort(403)  # Forbidden
         return f(*args, **kwargs)
     return decorated_function
 
 # -----------------------------
-# Admin route to manage questions
+# Admin dashboard route
+# -----------------------------
+@app.route('/admin')
+@login_required
+@admin_required
+def admin_dashboard():
+    # Replace with actual queries for users, words, messages, etc.
+    users = []      # Example: list of user objects
+    words = []      # Example: list of word objects
+    messages = []   # Example: messages if needed
+
+    return render_template(
+        'admin_dashboard.html',
+        users=users,
+        words=words,
+        messages=messages
+    )
+
+# -----------------------------
+# Admin route to manage quiz questions
 # -----------------------------
 @app.route('/manage-questions')
-@login_required       # ensures user is logged in
-@admin_required       # ensures user is admin
+@login_required
+@admin_required
 def manage_questions_all():
-    # If your HTML fetches questions dynamically, pass them here
-    # For now, just render the template
+    # Render the existing template; you can pass questions if needed
     return render_template('manage_questions.html')
+
+# -----------------------------
+# Optional test route to confirm deployment
+# -----------------------------
+@app.route('/test-route')
+def test_route():
+    return "Flask app is running and route is recognized!"
+
+# -----------------------------
+# Run locally for testing
+# -----------------------------
+if __name__ == "__main__":
+    import os
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port, debug=True)
 
 # -------------------------------
 # Section 5: Public Routes
