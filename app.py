@@ -401,6 +401,29 @@ def twi_quiz_home():
 def score_dashboard():
     ...
 
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+
+from flask import render_template
+import psycopg2
+
+@app.route('/quiz_history', endpoint='quiz_history')
+def quiz_history():
+    conn = get_db_connection()  # or however you get your DB connection
+    cur = conn.cursor()
+    cur.execute("""
+        SELECT username, category, score, total_questions, time_taken, date_taken
+        FROM quiz_history
+        ORDER BY date_taken DESC
+    """)
+    history = cur.fetchall()
+    cur.close()
+    conn.close()
+    
+    return render_template('quiz_history.html', history=history)
+
 # -------------------------------
 # Dictionary
 # -------------------------------
