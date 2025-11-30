@@ -401,10 +401,6 @@ def twi_quiz_home():
 def score_dashboard():
     ...
 
-@app.route('/')
-def index():
-    return render_template('index.html')
-
 
 from flask import render_template
 import psycopg2
@@ -533,6 +529,31 @@ def add_word():
 
     flash(f"'{word}' added successfully!", "success")
     return redirect(url_for('admin_dashboard'))
+
+from flask import render_template
+from flask_login import login_required, current_user  # if using Flask-Login
+
+# Optional: Admin-only access decorator
+def admin_required(f):
+    from functools import wraps
+    from flask import abort
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if not current_user.is_authenticated or not getattr(current_user, "is_admin", False):
+            abort(403)  # Forbidden
+        return f(*args, **kwargs)
+    return decorated_function
+
+# -----------------------------
+# Admin route to manage questions
+# -----------------------------
+@app.route('/manage-questions')
+@login_required       # ensures user is logged in
+@admin_required       # ensures user is admin
+def manage_questions_all():
+    # If your HTML fetches questions dynamically, pass them here
+    # For now, just render the template
+    return render_template('manage_questions.html')
 
 # -------------------------------
 # Section 5: Public Routes
