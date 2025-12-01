@@ -570,29 +570,16 @@ def admin_dashboard():
     )
 
 # -----------------------------
-# Admin route to manage quiz questions
+# Admin: Manage All Questions
 # -----------------------------
 @app.route('/manage-questions')
 @login_required
 @admin_required
 def manage_questions_all():
-    # Render the existing template; you can pass questions if needed
-    return render_template('manage_questions.html')
+    from db import get_all_questions  # or replace with your own DB function
 
-# -----------------------------
-# Optional test route to confirm deployment
-# -----------------------------
-@app.route('/test-route')
-def test_route():
-    return "Flask app is running and route is recognized!"
-
-# -----------------------------
-# Run locally for testing
-# -----------------------------
-if __name__ == "__main__":
-    import os
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    questions = get_all_questions()  # must return list of questions
+    return render_template('manage_questions_all.html', questions=questions)
 
 # -------------------------------
 # Section 5: Public Routes
