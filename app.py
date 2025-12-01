@@ -258,6 +258,23 @@ def admin_dashboard():
         messages=messages
     )
 
+@app.route('/manage-questions')
+@login_required
+def manage_questions_all():
+    if session.get('role') != 'admin':
+        flash("Admins only.", "danger")
+        return redirect(url_for('login'))
+
+    conn = get_db_connection()
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("SELECT * FROM quiz_questions ORDER BY id")
+    questions = cur.fetchall()
+    cur.close()
+    conn.close()
+
+    return render_template("manage_questions_all.html", questions=questions)
+
+
 # -------------------------------
 # Section 4: Admin Management of Users & Words & Quiz
 # -------------------------------
@@ -530,56 +547,6 @@ def add_word():
     flash(f"'{word}' added successfully!", "success")
     return redirect(url_for('admin_dashboard'))
 
-from flask import Flask, render_template, abort
-from flask_login import LoginManager, login_required, current_user
-
-app = Flask(__name__)
-login_manager = LoginManager(app)
-# Configure secret key, database, etc. as needed
-
-# -----------------------------
-# Admin-only access decorator
-# -----------------------------
-def admin_required(f):
-    from functools import wraps
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        # Ensure user is logged in and is admin
-        if not current_user.is_authenticated or not getattr(current_user, "is_admin", False):
-            abort(403)  # Forbidden
-        return f(*args, **kwargs)
-    return decorated_function
-
-# -----------------------------
-# Admin dashboard route
-# -----------------------------
-@app.route('/admin')
-@login_required
-@admin_required
-def admin_dashboard():
-    # Replace with actual queries for users, words, messages, etc.
-    users = []      # Example: list of user objects
-    words = []      # Example: list of word objects
-    messages = []   # Example: messages if needed
-
-    return render_template(
-        'admin_dashboard.html',
-        users=users,
-        words=words,
-        messages=messages
-    )
-
-# -----------------------------
-# Admin: Manage All Questions
-# -----------------------------
-@app.route('/manage-questions')
-@login_required
-@admin_required
-def manage_questions_all():
-    from db import get_all_questions  # or replace with your own DB function
-
-    questions = get_all_questions()  # must return list of questions
-    return render_template('manage_questions_all.html', questions=questions)
 
 # -------------------------------
 # Section 5: Public Routes
